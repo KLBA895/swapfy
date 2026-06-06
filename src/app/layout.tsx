@@ -8,15 +8,17 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EliteCV",
-  description: "Professionelle CV-Optimierung für den Schweizer Arbeitsmarkt.",
+  title: "SWAPFY – Exchange Value. Not Money.",
+  description:
+    "SWAPFY is a Swiss platform for fair item swapping. Exchange unused items directly with others.",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "EliteCV",
-    description: "Professionelle CV-Optimierung für den Schweizer Arbeitsmarkt.",
+    title: "SWAPFY – Exchange Value. Not Money.",
+    description:
+      "Swap unused items with others in Switzerland. Simple, transparent and sustainable.",
     images: ["/og-image.png"],
   },
 };

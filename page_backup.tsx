@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { FormEvent, useState } from "react";
 
 type Lang = "de" | "en";
 
 const content = {
   de: {
-    nav: ["So funktioniert es", "Kategorien", "Vorteile", "Frühzugang", "FAQ"],
+    nav: ["So funktioniert es", "Vorteile", "Frühzugang", "FAQ"],
     cta: "Frühzugang sichern",
     heroTitle: "Tausche Werte. Nicht Geld.",
     heroText:
@@ -22,8 +21,6 @@ const content = {
       ["2", "Passenden Tausch finden", "Finde Angebote mit ähnlichem Wert."],
       ["3", "Direkt tauschen", "Bestätigt den Tausch und gebt Produkten ein zweites Leben."],
     ],
-    categoriesTitle: "Beliebte Kategorien",
-    categories: ["Elektronik", "Gaming", "Uhren", "Kameras", "Sport", "Haushalt"],
     benefitsTitle: "Warum Swapfy?",
     benefits: [
       ["Fair", "Tausch auf Basis vergleichbarer Werte."],
@@ -47,7 +44,7 @@ const content = {
     ],
   },
   en: {
-    nav: ["How it works", "Categories", "Benefits", "Early Access", "FAQ"],
+    nav: ["How it works", "Benefits", "Early Access", "FAQ"],
     cta: "Join Early Access",
     heroTitle: "Exchange Value. Not Money.",
     heroText:
@@ -62,8 +59,6 @@ const content = {
       ["2", "Find a match", "Discover offers with similar value."],
       ["3", "Complete the swap", "Confirm the exchange and give products a second life."],
     ],
-    categoriesTitle: "Popular Categories",
-    categories: ["Electronics", "Gaming", "Watches", "Cameras", "Sports", "Home"],
     benefitsTitle: "Why Swapfy?",
     benefits: [
       ["Fair", "Exchange based on comparable value."],
@@ -114,42 +109,27 @@ export default function Home() {
     <main className="min-h-screen bg-white text-[#111827]">
       <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <a href="#" className="flex items-center gap-3">
-            <Image
-              src="/swapfy-icon.png"
-              alt="Swapfy Logo"
-              width={46}
-              height={46}
-              priority
-              className="rounded-full"
-            />
-            <span className="text-2xl font-bold tracking-tight">
-              SWAP<span className="text-[#16A34A]">FY</span>
-            </span>
+          <a href="#" className="text-2xl font-bold tracking-tight">
+            SWAP<span className="text-[#16A34A]">FY</span>
           </a>
 
-          <div className="hidden gap-7 text-sm font-medium text-gray-600 lg:flex">
+          <div className="hidden gap-8 text-sm font-medium text-gray-600 md:flex">
             <a href="#how-it-works">{t.nav[0]}</a>
-            <a href="#categories">{t.nav[1]}</a>
-            <a href="#benefits">{t.nav[2]}</a>
-            <a href="#early-access">{t.nav[3]}</a>
-            <a href="#faq">{t.nav[4]}</a>
+            <a href="#benefits">{t.nav[1]}</a>
+            <a href="#early-access">{t.nav[2]}</a>
+            <a href="#faq">{t.nav[3]}</a>
           </div>
 
           <div className="rounded-full border border-gray-200 p-1 text-xs font-semibold">
             <button
               onClick={() => setLang("de")}
-              className={`rounded-full px-3 py-1 ${
-                lang === "de" ? "bg-[#111827] text-white" : "text-gray-500"
-              }`}
+              className={`rounded-full px-3 py-1 ${lang === "de" ? "bg-[#111827] text-white" : "text-gray-500"}`}
             >
               DE
             </button>
             <button
               onClick={() => setLang("en")}
-              className={`rounded-full px-3 py-1 ${
-                lang === "en" ? "bg-[#111827] text-white" : "text-gray-500"
-              }`}
+              className={`rounded-full px-3 py-1 ${lang === "en" ? "bg-[#111827] text-white" : "text-gray-500"}`}
             >
               EN
             </button>
@@ -157,89 +137,62 @@ export default function Home() {
         </nav>
       </header>
 
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(22,163,74,0.15),transparent_35%),radial-gradient(circle_at_10%_10%,rgba(249,115,22,0.08),transparent_30%)]" />
+      <section className="mx-auto grid min-h-[90vh] max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2">
+        <div className="text-center lg:text-left">
+          <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-[#16A34A]">
+            SWAPFY
+          </p>
 
-        <div className="relative mx-auto grid min-h-[90vh] max-w-7xl items-center gap-14 px-6 py-20 lg:grid-cols-2">
-          <div className="text-center lg:text-left">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-[#16A34A]">
-              SWAPFY
-            </p>
+          <h1 className="text-5xl font-bold tracking-tight md:text-7xl">
+            {t.heroTitle}
+          </h1>
 
-            <h1 className="text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-              {t.heroTitle}
-            </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#6B7280]">
+            {t.heroText}
+          </p>
 
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[#6B7280]">
-              {t.heroText}
-            </p>
+          <div className="mt-10 flex flex-wrap justify-center gap-4 lg:justify-start">
+            <a href="#early-access" className="rounded-full bg-[#16A34A] px-7 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-105">
+              {t.cta}
+            </a>
 
-            <div className="mt-10 flex flex-wrap justify-center gap-4 lg:justify-start">
-              <a
-                href="#early-access"
-                className="rounded-full bg-[#16A34A] px-7 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-105"
-              >
-                {t.cta}
-              </a>
-
-              <a
-                href="#how-it-works"
-                className="rounded-full border border-gray-300 bg-white px-7 py-3 text-sm font-semibold transition hover:border-[#16A34A] hover:text-[#16A34A]"
-              >
-                {t.secondaryCta}
-              </a>
-            </div>
+            <a href="#how-it-works" className="rounded-full border border-gray-300 px-7 py-3 text-sm font-semibold transition hover:border-[#16A34A] hover:text-[#16A34A]">
+              {t.secondaryCta}
+            </a>
           </div>
+        </div>
 
-          <div className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-2xl">
-            <div className="rounded-[1.5rem] bg-gradient-to-br from-green-50 to-white p-6">
-              <div className="mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Image src="/swapfy-icon.png" alt="Swapfy" width={34} height={34} />
-                  <p className="font-semibold">Swap Detail</p>
-                </div>
+        <div className="rounded-[2rem] border border-gray-100 bg-white p-6 shadow-2xl">
+          <div className="rounded-[1.5rem] bg-gradient-to-br from-green-50 to-white p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <p className="font-semibold">Swap Detail</p>
+              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                {t.visualStatus}
+              </span>
+            </div>
 
-                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                  {t.visualStatus}
-                </span>
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <div className="mb-3 flex h-24 items-center justify-center rounded-xl bg-gray-100 text-4xl">⌚</div>
+                <p className="font-semibold">{t.visualItemA}</p>
+                <p className="text-sm text-gray-500">CHF 250</p>
               </div>
 
-              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <div className="mb-3 flex h-36 items-center justify-center rounded-xl bg-gray-100 text-5xl">
-                    ⌚
-                  </div>
-                  <p className="font-semibold">{t.visualItemA}</p>
-                  <p className="text-sm text-gray-500">CHF 250</p>
-                </div>
+              <div className="text-3xl text-[#16A34A]">↔</div>
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#16A34A] text-2xl text-white shadow-lg">
-                  ↔
-                </div>
-
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <div className="mb-3 flex h-36 items-center justify-center rounded-xl bg-gray-100 text-5xl">
-                    📷
-                  </div>
-                  <p className="font-semibold">{t.visualItemB}</p>
-                  <p className="text-sm text-gray-500">CHF 260</p>
-                </div>
+              <div className="rounded-2xl bg-white p-5 shadow-sm">
+                <div className="mb-3 flex h-24 items-center justify-center rounded-xl bg-gray-100 text-4xl">📷</div>
+                <p className="font-semibold">{t.visualItemB}</p>
+                <p className="text-sm text-gray-500">CHF 260</p>
               </div>
+            </div>
 
-              <div className="mt-6 grid grid-cols-4 gap-2 text-center text-xs font-semibold">
-                {["Confirmed", "Shipped", "Transit", "Done"].map((step, i) => (
-                  <div
-                    key={step}
-                    className={`rounded-full px-2 py-2 ${
-                      i < 2
-                        ? "bg-[#16A34A] text-white"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {step}
-                  </div>
-                ))}
-              </div>
+            <div className="mt-6 grid grid-cols-4 gap-2 text-center text-xs font-semibold">
+              {["Confirmed", "Shipped", "Transit", "Done"].map((step, i) => (
+                <div key={step} className={`rounded-full px-2 py-2 ${i < 2 ? "bg-[#16A34A] text-white" : "bg-gray-100 text-gray-500"}`}>
+                  {step}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -248,13 +201,10 @@ export default function Home() {
       <section id="how-it-works" className="border-y border-gray-100 bg-gray-50 px-6 py-20">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-3xl font-bold">{t.howTitle}</h2>
-
           <div className="mt-8 grid gap-6 md:grid-cols-3">
             {t.steps.map((step) => (
               <div key={step[0]} className="rounded-2xl bg-white p-6 shadow-sm">
-                <span className="text-sm font-bold text-[#16A34A]">
-                  Step {step[0]}
-                </span>
+                <span className="text-sm font-bold text-[#16A34A]">Step {step[0]}</span>
                 <h3 className="mt-3 text-xl font-semibold">{step[1]}</h3>
                 <p className="mt-3 text-gray-600">{step[2]}</p>
               </div>
@@ -263,37 +213,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="categories" className="mx-auto max-w-7xl px-6 py-20">
-        <h2 className="text-3xl font-bold">{t.categoriesTitle}</h2>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-          {t.categories.map((category, index) => {
-            const icons = ["📱", "🎮", "⌚", "📷", "🚲", "🏠"];
-            return (
-              <div
-                key={category}
-                className="rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-              >
-                <div className="text-4xl">{icons[index]}</div>
-                <p className="mt-3 font-semibold">{category}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <section id="benefits" className="border-y border-gray-100 bg-gray-50 px-6 py-20">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-3xl font-bold">{t.benefitsTitle}</h2>
-
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {t.benefits.map((item) => (
-              <div key={item[0]} className="rounded-2xl bg-white p-6 shadow-sm">
-                <h3 className="text-xl font-semibold">{item[0]}</h3>
-                <p className="mt-3 text-gray-600">{item[1]}</p>
-              </div>
-            ))}
-          </div>
+      <section id="benefits" className="mx-auto max-w-7xl px-6 py-20">
+        <h2 className="text-3xl font-bold">{t.benefitsTitle}</h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {t.benefits.map((item) => (
+            <div key={item[0]} className="rounded-2xl border border-gray-100 p-6">
+              <h3 className="text-xl font-semibold">{item[0]}</h3>
+              <p className="mt-3 text-gray-600">{item[1]}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -318,7 +246,6 @@ export default function Home() {
 
       <section id="faq" className="mx-auto max-w-7xl px-6 py-20">
         <h2 className="text-3xl font-bold">{t.faqTitle}</h2>
-
         <div className="mt-8 grid gap-4">
           {t.faqs.map((faq) => (
             <div key={faq[0]} className="rounded-2xl border border-gray-100 p-6">
