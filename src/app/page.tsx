@@ -8,12 +8,12 @@ type Lang = "de" | "en";
 
 const content = {
   de: {
-    nav: ["So funktioniert es", "Kategorien", "Vorteile", "Frühzugang", "FAQ"],
-    cta: "Frühzugang sichern",
+    nav: ["Tauschideen entdecken", "Kategorien", "Vorteile", "Frühzugang", "FAQ"],
+    cta: "Artikel einreichen",
     heroTitle: "Tausche Werte. Nicht Geld.",
     heroText:
       "Tausche ungenutzte Gegenstände mit anderen Menschen in der Schweiz. Einfach, transparent und nachhaltig.",
-    secondaryCta: "So funktioniert es",
+    secondaryCta: "Tauschideen entdecken",
     visualStatus: "Tausch bestätigt",
     visualItemA: "Apple Watch",
     visualItemB: "Kamera",
@@ -31,7 +31,7 @@ const content = {
       ["Nachhaltig", "Weniger Konsum, mehr Wiederverwendung."],
       ["Einfach", "Keine komplizierten Verkaufsprozesse."],
     ],
-    accessTitle: "Frühzugang sichern",
+    accessTitle: "Artikel einreichen",
     accessText:
       "Swapfy befindet sich aktuell im Aufbau. Melde dich an und erfahre als Erstes, wann die Plattform startet.",
     name: "Name",
@@ -52,7 +52,7 @@ const content = {
   },
   en: {
     nav: ["How it works", "Categories", "Benefits", "Early Access", "FAQ"],
-    cta: "Join Early Access",
+    cta: "Submit Item",
     heroTitle: "Exchange Value. Not Money.",
     heroText:
       "Swap unused items with others in Switzerland. Simple, transparent and sustainable.",
@@ -74,7 +74,7 @@ const content = {
       ["Sustainable", "Less consumption, more reuse."],
       ["Simple", "No complicated selling process."],
     ],
-    accessTitle: "Join Early Access",
+    accessTitle: "Submit Item",
     accessText:
       "Swapfy is currently being built. Sign up and be the first to know when the platform launches.",
     name: "Name",
@@ -183,7 +183,7 @@ export default function Home() {
 
             <div className="mt-10 flex flex-wrap justify-center gap-4 lg:justify-start">
               <a
-                href="#early-access"
+                href="/item-submit"
                 className="rounded-full bg-[#16A34A] px-7 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-105"
               >
                 {t.cta}
