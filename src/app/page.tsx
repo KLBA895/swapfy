@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { FormEvent, useState } from "react";
+import { FaInstagram } from "react-icons/fa";
 
 type Lang = "de" | "en";
 
@@ -39,6 +40,9 @@ const content = {
     submit: "Benachrichtige mich",
     success: "Danke! Deine Anfrage wurde übermittelt.",
     faqTitle: "FAQ",
+    imprint: "Impressum",
+    privacy: "Datenschutz",
+    terms: "AGB",
     faqs: [
       ["Ist Swapfy kostenlos?", "Zum Start ist die Nutzung kostenlos. Später kann eine kleine Erfolgsgebühr dazukommen."],
       ["Wie wird der Wert bestimmt?", "Am Anfang geben Nutzer den geschätzten Wert selbst an. Später kann ein Matching-System helfen."],
@@ -79,6 +83,9 @@ const content = {
     submit: "Notify me",
     success: "Thank you! Your request has been submitted.",
     faqTitle: "FAQ",
+    imprint: "Imprint",
+    privacy: "Privacy Policy",
+    terms: "Terms",
     faqs: [
       ["Is Swapfy free?", "At launch, Swapfy is free to use. A small success fee may be added later."],
       ["How is value determined?", "At first, users enter an estimated value. Later, a matching system can help."],
@@ -329,8 +336,36 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} SWAPFY. Exchange Value. Not Money.
+      <footer className="border-t border-gray-100 px-6 py-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium">
+            <a href="/impressum" className="hover:text-[#16A34A]">
+              {t.imprint}
+            </a>
+
+            <a href="/datenschutz" className="hover:text-[#16A34A]">
+              {t.privacy}
+            </a>
+
+            <a href="/agb" className="hover:text-[#16A34A]">
+              {t.terms}
+            </a>
+
+            <a
+              href="https://instagram.com/swapfy_ch"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center hover:text-[#16A34A]"
+              aria-label="Instagram"
+            >
+              <FaInstagram size={24} />
+            </a>
+          </div>
+
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} SWAPFY. Exchange Value. Not Money.
+          </p>
+        </div>
       </footer>
     </main>
   );
