@@ -25,13 +25,20 @@ export default function ImpressumPage() {
             <h1 className="mt-6 text-4xl font-semibold tracking-[-0.02em]">Impressum</h1>
             <div className="mt-8 space-y-6 leading-relaxed text-[#0A1F44]/80">
               <p>
-              <strong>EliteCV</strong><br />
+              <strong>SWAPFY</strong><br />
 Inhaber: Klaudio Batinić<br />
 Dietikon, Schweiz
               </p>
               <p>
-                E-Mail: <a href="mailto:info@elitecv.ch" className="font-semibold hover:text-[#C9A95A]">info@elitecv.ch</a>
-              </p>
+E-Mail:
+<br />
+info@elitecv.ch
+</p>
+
+<p className="text-sm text-[#0A1F44]/60">
+Die offizielle Kontaktadresse info@swapfy.ch wird derzeit eingerichtet.
+Anfragen können vorübergehend über info@elitecv.ch eingereicht werden.
+</p>
               <p>
               Verantwortlich für den Inhalt:
               Klaudio Batinić
@@ -48,12 +55,15 @@ Owner: Klaudio Batinić<br />
 Dietikon, Switzerland
               </p>
               <p>
-                Email: <a href="mailto:info@elitecv.ch" className="font-semibold hover:text-[#C9A95A]">info@elitecv.ch</a>
-              </p>
-              <p>
-              Responsible for the content:
-                Klaudio Batinić
-              </p>
+Email:
+<br />
+info@elitecv.ch
+</p>
+
+<p className="text-sm text-[#0A1F44]/60">
+The official contact address info@swapfy.ch is currently being set up.
+Until then, enquiries can be sent to info@elitecv.ch.
+</p>
             </div>
           </>
         )}

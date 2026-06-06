@@ -8,7 +8,13 @@ type Lang = "de" | "en";
 
 const content = {
   de: {
-    nav: ["Tauschideen entdecken", "Kategorien", "Vorteile", "Frühzugang", "FAQ"],
+    nav: [
+      "Artikel einreichen",
+      "Tauschideen entdecken",
+      "Kategorien",
+      "Vorteile",
+      "FAQ",
+    ],
     cta: "Artikel einreichen",
     heroTitle: "Tausche Werte. Nicht Geld.",
     heroText:
@@ -24,7 +30,20 @@ const content = {
       ["3", "Direkt tauschen", "Bestätigt den Tausch und gebt Produkten ein zweites Leben."],
     ],
     categoriesTitle: "Beliebte Kategorien",
-    categories: ["Elektronik", "Gaming", "Uhren", "Kameras", "Sport", "Haushalt"],
+    categories: [
+      "Smartphones",
+      "Laptops",
+      "Gaming",
+      "Kameras",
+      "Fahrräder",
+      "Uhren",
+      "Sport",
+      "Haushalt",
+      "Werkzeuge",
+      "Sammlerstücke",
+      "Mode",
+      "Audio",
+    ],
     benefitsTitle: "Warum Swapfy?",
     benefits: [
       ["Fair", "Tausch auf Basis vergleichbarer Werte."],
@@ -51,7 +70,13 @@ const content = {
     ],
   },
   en: {
-    nav: ["How it works", "Categories", "Benefits", "Early Access", "FAQ"],
+    nav: [
+      "Submit Item",
+      "Browse Swaps",
+      "Categories",
+      "Benefits",
+      "FAQ",
+    ],
     cta: "Submit Item",
     heroTitle: "Exchange Value. Not Money.",
     heroText:
@@ -67,7 +92,20 @@ const content = {
       ["3", "Complete the swap", "Confirm the exchange and give products a second life."],
     ],
     categoriesTitle: "Popular Categories",
-    categories: ["Electronics", "Gaming", "Watches", "Cameras", "Sports", "Home"],
+    categories: [
+      "Smartphones",
+      "Laptops",
+      "Gaming",
+      "Cameras",
+      "Bikes",
+      "Watches",
+      "Sports",
+      "Home",
+      "Tools",
+      "Collectibles",
+      "Fashion",
+      "Audio",
+    ],
     benefitsTitle: "Why Swapfy?",
     benefits: [
       ["Fair", "Exchange based on comparable value."],
@@ -134,14 +172,33 @@ export default function Home() {
               SWAP<span className="text-[#16A34A]">FY</span>
             </span>
           </a>
+          nav: [
+  "Artikel einreichen",
+  "Tauschideen entdecken",
+  "Kategorien",
+  "Vorteile",
+  "FAQ",
+],
+nav: [
+  "Submit Item",
+  "Browse Swaps",
+  "Categories",
+  "Benefits",
+  "FAQ",
+],
 
-          <div className="hidden gap-7 text-sm font-medium text-gray-600 lg:flex">
-            <a href="#how-it-works">{t.nav[0]}</a>
-            <a href="#categories">{t.nav[1]}</a>
-            <a href="#benefits">{t.nav[2]}</a>
-            <a href="#early-access">{t.nav[3]}</a>
-            <a href="#faq">{t.nav[4]}</a>
-          </div>
+<div className="hidden gap-7 text-sm font-medium text-gray-600 lg:flex">
+  <a href="/item-submit">{t.nav[0]}</a>
+
+  <a href="/items">
+    {lang === "de" ? "Marktplatz" : "Marketplace"}
+  </a>
+
+  <a href="#how-it-works">{t.nav[1]}</a>
+  <a href="#categories">{t.nav[2]}</a>
+  <a href="#benefits">{t.nav[3]}</a>
+  <a href="#faq">{t.nav[4]}</a>
+</div>
 
           <div className="rounded-full border border-gray-200 p-1 text-xs font-semibold">
             <button
@@ -275,7 +332,20 @@ export default function Home() {
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           {t.categories.map((category, index) => {
-            const icons = ["📱", "🎮", "⌚", "📷", "🚲", "🏠"];
+            const icons = [
+              "📱",
+              "💻",
+              "🎮",
+              "📷",
+              "🚲",
+              "⌚",
+              "⚽",
+              "🏠",
+              "🔧",
+              "🎁",
+              "👕",
+              "🎧",
+            ];
             return (
               <div
                 key={category}
