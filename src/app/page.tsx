@@ -172,20 +172,8 @@ export default function Home() {
               SWAP<span className="text-[#16A34A]">FY</span>
             </span>
           </a>
-          nav: [
-  "Artikel einreichen",
-  "Tauschideen entdecken",
-  "Kategorien",
-  "Vorteile",
-  "FAQ",
-],
-nav: [
-  "Submit Item",
-  "Browse Swaps",
-  "Categories",
-  "Benefits",
-  "FAQ",
-],
+          
+
 
 <div className="hidden gap-7 text-sm font-medium text-gray-600 lg:flex">
   <a href="/item-submit">{t.nav[0]}</a>
@@ -433,8 +421,10 @@ nav: [
           </div>
 
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} SWAPFY. Exchange Value. Not Money.
-          </p>
+  © {new Date().getFullYear()} SWAPFY. {lang === "de"
+    ? "Tausche Werte. Nicht Geld."
+    : "Exchange Value. Not Money."}
+</p>
         </div>
       </footer>
     </main>

@@ -8,13 +8,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://swapfy.ch"),
+
   title: "SWAPFY – Exchange Value. Not Money.",
+
   description:
     "SWAPFY is a Swiss platform for fair item swapping. Exchange unused items directly with others.",
+
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+
   openGraph: {
     title: "SWAPFY – Exchange Value. Not Money.",
     description:
