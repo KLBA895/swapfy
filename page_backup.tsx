@@ -257,8 +257,9 @@ export default function Home() {
       </section>
 
       <footer className="border-t border-gray-100 px-6 py-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} SWAPFY. Exchange Value. Not Money.
-      </footer>
+  © {new Date().getFullYear()} SWAPFY.{" "}
+  {lang === "de" ? "Alle Rechte vorbehalten." : "All rights reserved."}
+</footer>
     </main>
   );
 }

@@ -31,14 +31,14 @@ const items = [
     title: "MacBook Air",
     value: "CHF 600",
     region: "Basel",
-    category: "Laptops",
+    category: "Laptops & Tablets",
     image: "/items/macbook.jpg",
   },
   {
     title: "Mountainbike",
     value: "CHF 450",
     region: "Luzern",
-    category: "Sports",
+    category: "Bicycles",
     image: "/items/bike.jpg",
   },
   {
@@ -83,7 +83,22 @@ export default function MarketplacePage() {
 
   const t = content[lang];
 
-  const categories = ["all", ...Array.from(new Set(items.map((item) => item.category)))];
+  const categories = [
+    "all",
+    "Electronics",
+    "Smartphones",
+    "Laptops & Tablets",
+    "Gaming",
+    "Cameras",
+    "Watches",
+    "Sports & Outdoor",
+    "Bicycles",
+    "Home & Living",
+    "Tools",
+    "Fashion",
+    "Collectibles",
+    "Other",
+  ];
   const regions = ["all", ...Array.from(new Set(items.map((item) => item.region)))];
 
   const filteredItems = useMemo(() => {

@@ -2,26 +2,44 @@
 
 import Image from "next/image";
 import { FormEvent, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ItemSubmitPage() {
   const [submitted, setSubmitted] = useState(false);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+  setSubmitted(false);
 
-    const formData = new FormData(e.currentTarget);
-    formData.append("type", "Swapfy Item Submission");
+  const formData = new FormData(e.currentTarget);
 
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      body: formData,
-    });
+  const { error } = await supabase.from("items").insert({
+    name: formData.get("name") as string,
+    email: formData.get("email") as string,
+    title: formData.get("itemTitle") as string,
+    category: formData.get("category") as string,
+    condition: formData.get("condition") as string,
+    estimated_value: formData.get("estimatedValue") as string,
+    region: formData.get("region") as string,
+    wanted_item: formData.get("wantedItem") as string,
+    description: formData.get("description") as string,
+    status: "pending",
+  });
 
-    if (response.ok) {
-      setSubmitted(true);
-      e.currentTarget.reset();
-    }
-  };
+  setLoading(false);
+
+  if (error) {
+    setError("Es gab ein Problem beim Speichern. Bitte versuche es nochmals.");
+    return;
+  }
+
+  setSubmitted(true);
+  e.currentTarget.reset();
+};
 
   return (
     <main className="min-h-screen bg-white text-[#111827]">
@@ -50,18 +68,18 @@ export default function ItemSubmitPage() {
       </header>
 
       <section className="mx-auto max-w-3xl px-6 py-16">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#16A34A]">
-          Artikel einreichen
-        </p>
+  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#16A34A]">
+    Artikel einreichen
+  </p>
 
-        <h1 className="mt-4 text-4xl font-bold md:text-5xl">
-          Was möchtest du tauschen?
-        </h1>
+  <h1 className="mt-4 text-4xl font-bold md:text-5xl">
+    Was möchtest du tauschen?
+  </h1>
 
-        <p className="mt-5 text-lg leading-8 text-gray-600">
-          Reiche deinen ersten Artikel ein. Wir prüfen die Anfrage und sammeln
-          erste Tauschideen für den Start von Swapfy.
-        </p>
+  <p className="mt-5 text-lg leading-8 text-gray-600">
+    Reiche deinen ersten Artikel ein. Wir prüfen die Anfrage und sammeln
+    erste Tauschideen für den Start von Swapfy.
+  </p>
 
         <form
           onSubmit={handleSubmit}
@@ -121,9 +139,21 @@ export default function ItemSubmitPage() {
   className="mt-4 w-full rounded-xl border border-gray-200 bg-white px-4 py-3"
 />
 
-          <button className="mt-6 w-full rounded-full bg-[#16A34A] px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02]">
-            Artikel einreichen
-          </button>
+<button className="mt-6 w-full rounded-full bg-[#16A34A] px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02]">
+  {loading ? "Wird gespeichert..." : "Artikel einreichen"}
+</button>
+
+{error && (
+  <p className="mt-4 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">
+    {error}
+  </p>
+)}
+
+{submitted && (
+  <p className="mt-4 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700">
+    Danke! Dein Artikel wurde übermittelt.
+  </p>
+)}
 
           {submitted && (
             <p className="mt-4 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700">
