@@ -102,6 +102,7 @@ export default function Home() {
     if (response.ok) {
       setSubmitted(true);
       e.currentTarget.reset();
+      
     }
   };
 

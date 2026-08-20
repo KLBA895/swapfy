@@ -1,119 +1,126 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabaseClient";
 
 type Lang = "de" | "en";
 
-const items = [
-  {
-    title: "Apple Watch Series 9",
-    value: "CHF 250",
-    region: "Zürich",
-    category: "Watches",
-    image: "/items/apple-watch.jpg",
-  },
-  {
-    title: "Canon EOS Kamera",
-    value: "CHF 280",
-    region: "Aarau",
-    category: "Cameras",
-    image: "/items/camera.jpg",
-  },
-  {
-    title: "Nintendo Switch",
-    value: "CHF 220",
-    region: "Bern",
-    category: "Gaming",
-    image: "/items/switch.jpg",
-  },
-  {
-    title: "MacBook Air",
-    value: "CHF 600",
-    region: "Basel",
-    category: "Laptops & Tablets",
-    image: "/items/macbook.jpg",
-  },
-  {
-    title: "Mountainbike",
-    value: "CHF 450",
-    region: "Luzern",
-    category: "Bicycles",
-    image: "/items/bike.jpg",
-  },
-  {
-    title: "iPhone 15",
-    value: "CHF 700",
-    region: "Winterthur",
-    category: "Smartphones",
-    image: "/items/iphone.jpg",
-  },
-];
+type Item = {
+  id: string;
+  title: string;
+  category: string;
+  condition: string;
+  estimated_value: string;
+  currency: string | null;
+  postal_code: string | null;
+  region: string;
+  wanted_item: string | null;
+  description: string | null;
+  image_url: string | null;
+  created_at: string;
+};
 
 const content = {
   de: {
     back: "Zurück zur Startseite",
     title: "Marktplatz",
-    subtitle: "Entdecke mögliche Tauschangebote auf Swapfy.",
+    subtitle: "Entdecke echte Tauschangebote auf Swapfy.",
     search: "Artikel suchen...",
     allCategories: "Alle Kategorien",
     allRegions: "Alle Regionen",
     view: "Tausch ansehen",
     submit: "Artikel einreichen",
     empty: "Keine passenden Artikel gefunden.",
+    wanted: "Gesucht",
+    loading: "Angebote werden geladen...",
+    error: "Angebote konnten nicht geladen werden.",
   },
   en: {
     back: "Back to homepage",
     title: "Marketplace",
-    subtitle: "Explore potential swap opportunities on Swapfy.",
+    subtitle: "Explore real swap opportunities on Swapfy.",
     search: "Search items...",
     allCategories: "All categories",
     allRegions: "All regions",
     view: "View Swap",
     submit: "Submit Item",
     empty: "No matching items found.",
+    wanted: "Wanted",
+    loading: "Loading offers...",
+    error: "Could not load offers.",
   },
 };
+
+const fallbackImage = "/items/apple-watch.jpg";
 
 export default function MarketplacePage() {
   const [lang, setLang] = useState<Lang>("de");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [region, setRegion] = useState("all");
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const t = content[lang];
 
-  const categories = [
-    "all",
-    "Electronics",
-    "Smartphones",
-    "Laptops & Tablets",
-    "Gaming",
-    "Cameras",
-    "Watches",
-    "Sports & Outdoor",
-    "Bicycles",
-    "Home & Living",
-    "Tools",
-    "Fashion",
-    "Collectibles",
-    "Other",
-  ];
-  const regions = ["all", ...Array.from(new Set(items.map((item) => item.region)))];
+  useEffect(() => {
+    const loadItems = async () => {
+      setLoading(true);
+      setLoadError("");
+
+      const { data, error } = await supabase
+        .from("items")
+        .select(
+          "id, title, category, condition, estimated_value, currency, postal_code, region, wanted_item, description, image_url, created_at"
+        )
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.log("Load items error:", error);
+        setLoadError(t.error);
+        setLoading(false);
+        return;
+      }
+
+      setItems((data || []) as Item[]);
+      setLoading(false);
+    };
+
+    loadItems();
+  }, [t.error]);
+
+  const categories = useMemo(() => {
+    return ["all", ...Array.from(new Set(items.map((item) => item.category).filter(Boolean)))];
+  }, [items]);
+
+  const regions = useMemo(() => {
+    return ["all", ...Array.from(new Set(items.map((item) => item.region).filter(Boolean)))];
+  }, [items]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
-      const matchesQuery =
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.region.toLowerCase().includes(query.toLowerCase()) ||
-        item.category.toLowerCase().includes(query.toLowerCase());
+      const text = [
+        item.title,
+        item.region,
+        item.postal_code,
+        item.category,
+        item.condition,
+        item.wanted_item,
+        item.description,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
+      const matchesQuery = text.includes(query.toLowerCase());
       const matchesCategory = category === "all" || item.category === category;
       const matchesRegion = region === "all" || item.region === region;
 
       return matchesQuery && matchesCategory && matchesRegion;
     });
-  }, [query, category, region]);
+  }, [items, query, category, region]);
 
   return (
     <main className="min-h-screen bg-white text-[#111827]">
@@ -143,17 +150,15 @@ export default function MarketplacePage() {
             <div className="rounded-full border border-gray-200 p-1 text-xs font-semibold">
               <button
                 onClick={() => setLang("de")}
-                className={`rounded-full px-3 py-1 ${
-                  lang === "de" ? "bg-[#111827] text-white" : "text-gray-500"
-                }`}
+                className={`rounded-full px-3 py-1 ${lang === "de" ? "bg-[#111827] text-white" : "text-gray-500"
+                  }`}
               >
                 DE
               </button>
               <button
                 onClick={() => setLang("en")}
-                className={`rounded-full px-3 py-1 ${
-                  lang === "en" ? "bg-[#111827] text-white" : "text-gray-500"
-                }`}
+                className={`rounded-full px-3 py-1 ${lang === "en" ? "bg-[#111827] text-white" : "text-gray-500"
+                  }`}
               >
                 EN
               </button>
@@ -223,7 +228,15 @@ export default function MarketplacePage() {
           </select>
         </div>
 
-        {filteredItems.length === 0 ? (
+        {loading ? (
+          <p className="mt-12 rounded-2xl bg-gray-50 p-6 text-center text-gray-500">
+            {t.loading}
+          </p>
+        ) : loadError ? (
+          <p className="mt-12 rounded-2xl bg-red-50 p-6 text-center text-red-700">
+            {loadError}
+          </p>
+        ) : filteredItems.length === 0 ? (
           <p className="mt-12 rounded-2xl bg-gray-50 p-6 text-center text-gray-500">
             {t.empty}
           </p>
@@ -231,17 +244,17 @@ export default function MarketplacePage() {
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredItems.map((item) => (
               <div
-                key={item.title}
+                key={item.id}
                 className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="relative mb-5 h-52 overflow-hidden rounded-2xl">
-  <Image
-    src={item.image}
-    alt={item.title}
-    fill
-    className="object-cover"
-  />
-</div>
+                <div className="relative mb-5 h-52 overflow-hidden rounded-2xl bg-gray-50">
+                  <Image
+                    src={item.image_url || fallbackImage}
+                    alt={item.title}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
 
                 <div className="mb-3 inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
                   {item.category}
@@ -249,13 +262,28 @@ export default function MarketplacePage() {
 
                 <h2 className="text-xl font-semibold">{item.title}</h2>
 
-                <p className="mt-2 text-gray-500">{item.value}</p>
+                <p className="mt-2 font-semibold text-gray-700">
+                  {item.estimated_value} {item.currency || "CHF"}
+                </p>
 
-                <p className="mt-1 text-gray-500">📍 {item.region}</p>
+                <p className="mt-1 text-gray-500">
+                  📍 {item.postal_code ? `${item.postal_code} ` : ""}
+                  {item.region}
+                </p>
 
-                <button className="mt-5 w-full rounded-full bg-[#16A34A] px-5 py-3 font-semibold text-white">
+                {item.wanted_item && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    🔄 {t.wanted}:{" "}
+                    <span className="font-semibold">{item.wanted_item}</span>
+                  </p>
+                )}
+
+                <a
+                  href={`/items/${item.id}`}
+                  className="mt-5 block w-full rounded-full bg-[#16A34A] px-5 py-3 text-center font-semibold text-white"
+                >
                   {t.view}
-                </button>
+                </a>
               </div>
             ))}
           </div>

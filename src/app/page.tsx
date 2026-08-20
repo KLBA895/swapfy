@@ -172,36 +172,34 @@ export default function Home() {
               SWAP<span className="text-[#16A34A]">FY</span>
             </span>
           </a>
-          
 
 
-<div className="hidden gap-7 text-sm font-medium text-gray-600 lg:flex">
-  <a href="/item-submit">{t.nav[0]}</a>
 
-  <a href="/items">
-    {lang === "de" ? "Marktplatz" : "Marketplace"}
-  </a>
+          <div className="hidden gap-7 text-sm font-medium text-gray-600 lg:flex">
+            <a href="/item-submit">{t.nav[0]}</a>
 
-  <a href="#how-it-works">{t.nav[1]}</a>
-  <a href="#categories">{t.nav[2]}</a>
-  <a href="#benefits">{t.nav[3]}</a>
-  <a href="#faq">{t.nav[4]}</a>
-</div>
+            <a href="/items">
+              {lang === "de" ? "Marktplatz" : "Marketplace"}
+            </a>
+
+            <a href="#how-it-works">{t.nav[1]}</a>
+            <a href="#categories">{t.nav[2]}</a>
+            <a href="#benefits">{t.nav[3]}</a>
+            <a href="#faq">{t.nav[4]}</a>
+          </div>
 
           <div className="rounded-full border border-gray-200 p-1 text-xs font-semibold">
             <button
               onClick={() => setLang("de")}
-              className={`rounded-full px-3 py-1 ${
-                lang === "de" ? "bg-[#111827] text-white" : "text-gray-500"
-              }`}
+              className={`rounded-full px-3 py-1 ${lang === "de" ? "bg-[#111827] text-white" : "text-gray-500"
+                }`}
             >
               DE
             </button>
             <button
               onClick={() => setLang("en")}
-              className={`rounded-full px-3 py-1 ${
-                lang === "en" ? "bg-[#111827] text-white" : "text-gray-500"
-              }`}
+              className={`rounded-full px-3 py-1 ${lang === "en" ? "bg-[#111827] text-white" : "text-gray-500"
+                }`}
             >
               EN
             </button>
@@ -282,11 +280,10 @@ export default function Home() {
                 {["Confirmed", "Shipped", "Transit", "Done"].map((step, i) => (
                   <div
                     key={step}
-                    className={`rounded-full px-2 py-2 ${
-                      i < 2
-                        ? "bg-[#16A34A] text-white"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
+                    className={`rounded-full px-2 py-2 ${i < 2
+                      ? "bg-[#16A34A] text-white"
+                      : "bg-gray-100 text-gray-500"
+                      }`}
                   >
                     {step}
                   </div>
@@ -421,10 +418,10 @@ export default function Home() {
           </div>
 
           <p className="text-sm text-gray-500">
-  © {new Date().getFullYear()} SWAPFY. {lang === "de"
-    ? "Tausche Werte. Nicht Geld."
-    : "Exchange Value. Not Money."}
-</p>
+            © {new Date().getFullYear()} SWAPFY. {lang === "de"
+              ? "Tausche Werte. Nicht Geld."
+              : "Exchange Value. Not Money."}
+          </p>
         </div>
       </footer>
     </main>

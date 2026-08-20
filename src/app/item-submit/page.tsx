@@ -6,40 +6,89 @@ import { supabase } from "@/lib/supabaseClient";
 
 export default function ItemSubmitPage() {
   const [submitted, setSubmitted] = useState(false);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
+  const [fileName, setFileName] = useState("");
+  const swissPostalCodes: Record<string, string> = {
+    "8001": "Zürich",
+    "8953": "Dietikon",
+    "5400": "Baden",
+    "5000": "Aarau",
+    "3000": "Bern",
+    "4001": "Basel",
+    "6003": "Luzern",
+    "8400": "Winterthur",
+    "9000": "St. Gallen",
+    "1201": "Genf",
+    "1003": "Lausanne",
+  };
 
-const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
-  setSubmitted(false);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSubmitted(false);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const formData = new FormData(e.currentTarget);
+    const imageFile = formData.get("image") as File;
+    let imageUrl = "";
 
-  const { error } = await supabase.from("items").insert({
-    name: formData.get("name") as string,
-    email: formData.get("email") as string,
-    title: formData.get("itemTitle") as string,
-    category: formData.get("category") as string,
-    condition: formData.get("condition") as string,
-    estimated_value: formData.get("estimatedValue") as string,
-    region: formData.get("region") as string,
-    wanted_item: formData.get("wantedItem") as string,
-    description: formData.get("description") as string,
-    status: "pending",
-  });
+    if (imageFile && imageFile.size > 0) {
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `items/${fileName}`;
 
-  setLoading(false);
+      const { error: uploadError } = await supabase.storage
+        .from("item-images")
+        .upload(filePath, imageFile);
 
-  if (error) {
-    setError("Es gab ein Problem beim Speichern. Bitte versuche es nochmals.");
-    return;
-  }
+      if (uploadError) {
+        setLoading(false);
+        setError(`Bild-Upload Fehler: ${uploadError.message}`);
+        return;
+      }
 
-  setSubmitted(true);
-  e.currentTarget.reset();
-};
+      const { data } = supabase.storage
+        .from("item-images")
+        .getPublicUrl(filePath);
+
+      imageUrl = data.publicUrl;
+    }
+
+    const { error } = await supabase.from("items").insert({
+      user_id: user?.id,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      title: formData.get("itemTitle") as string,
+      category: formData.get("category") as string,
+      condition: formData.get("condition") as string,
+      estimated_value: formData.get("estimatedValue") as string,
+      currency: formData.get("currency") as string,
+      postal_code: formData.get("postalCode") as string,
+      region: formData.get("region") as string,
+      wanted_item: formData.get("wantedItem") as string,
+      description: formData.get("description") as string,
+      image_url: imageUrl,
+      status: "pending",
+    });
+
+    setLoading(false);
+
+    if (error) {
+      console.log("Supabase error:", error);
+      setError(`Fehler: ${error.message}`);
+      return;
+    }
+    setSubmitted(true);
+    form.reset();
+    setPreview(null);
+    setFileName("");
+  };
 
   return (
     <main className="min-h-screen bg-white text-[#111827]">
@@ -68,18 +117,18 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
       </header>
 
       <section className="mx-auto max-w-3xl px-6 py-16">
-  <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#16A34A]">
-    Artikel einreichen
-  </p>
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#16A34A]">
+          Artikel einreichen
+        </p>
 
-  <h1 className="mt-4 text-4xl font-bold md:text-5xl">
-    Was möchtest du tauschen?
-  </h1>
+        <h1 className="mt-4 text-4xl font-bold md:text-5xl">
+          Was möchtest du tauschen?
+        </h1>
 
-  <p className="mt-5 text-lg leading-8 text-gray-600">
-    Reiche deinen ersten Artikel ein. Wir prüfen die Anfrage und sammeln
-    erste Tauschideen für den Start von Swapfy.
-  </p>
+        <p className="mt-5 text-lg leading-8 text-gray-600">
+          Reiche deinen ersten Artikel ein. Wir prüfen die Anfrage und sammeln
+          erste Tauschideen für den Start von Swapfy.
+        </p>
 
         <form
           onSubmit={handleSubmit}
@@ -89,36 +138,88 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
             <input name="name" required placeholder="Name" className="rounded-xl border border-gray-200 px-4 py-3" />
             <input name="email" required type="email" placeholder="E-Mail" className="rounded-xl border border-gray-200 px-4 py-3" />
             <input name="itemTitle" required placeholder="Artikelname, z.B. Apple Watch" className="rounded-xl border border-gray-200 px-4 py-3" />
-            <input name="estimatedValue" required placeholder="Geschätzter Wert, z.B. CHF 250" className="rounded-xl border border-gray-200 px-4 py-3" />
+            <div className="flex overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <input
+                name="estimatedValue"
+                required
+                placeholder="Wert"
+                className="w-full border-0 border-r border-gray-200 px-4 py-3"
+              />
+
+              <select
+                name="currency"
+                required
+                defaultValue="CHF"
+                className="w-28 rounded-r-xl rounded-l-none border-0 bg-white px-3 py-3 font-semibold outline-none"
+              >
+                <option value="CHF">CHF 🇨🇭</option>
+                <option value="EUR">EUR 🇪🇺</option>
+                <option value="USD">USD 🇺🇸</option>
+                <option value="GBP">GBP 🇬🇧</option>
+              </select>
+            </div>
           </div>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <select name="category" required className="rounded-xl border border-gray-200 px-4 py-3">
               <option value="">Kategorie wählen</option>
-              <option>Elektronik</option>
-              <option>Gaming</option>
-              <option>Uhren</option>
-              <option>Kameras</option>
-              <option>Sport</option>
-              <option>Haushalt</option>
-              <option>Andere</option>
+
+              <option>📱 Elektronik</option>
+              <option>💻 Computer & IT</option>
+              <option>⌚ Uhren & Schmuck</option>
+              <option>📷 Kameras</option>
+              <option>🎮 Gaming</option>
+              <option>🚲 Fahrräder</option>
+              <option>🚗 Fahrzeuge</option>
+              <option>🏡 Haus & Garten</option>
+              <option>🛋 Möbel</option>
+              <option>👕 Kleidung & Mode</option>
+              <option>👟 Schuhe</option>
+              <option>🏋 Sport & Fitness</option>
+              <option>🎸 Musikinstrumente</option>
+              <option>📚 Bücher</option>
+              <option>🧸 Baby & Kinder</option>
+              <option>🐶 Haustiere</option>
+              <option>🎨 Freizeit & Hobby</option>
+              <option>🛠 Werkzeuge</option>
+              <option>📦 Sonstiges</option>
             </select>
 
             <select name="condition" required className="rounded-xl border border-gray-200 px-4 py-3">
               <option value="">Zustand wählen</option>
-              <option>Neu</option>
-              <option>Sehr gut</option>
-              <option>Gut</option>
-              <option>Gebraucht</option>
+              <option>✨ Neu (originalverpackt)</option>
+              <option>⭐ Wie neu</option>
+              <option>👍 Sehr gut</option>
+              <option>👌 Gut</option>
+              <option>🟡 Gebraucht</option>
+              <option>🟡 🔧 Defekt / Bastler</option>
             </select>
           </div>
 
-          <input
-            name="region"
-            required
-            placeholder="Region / Stadt, z.B. Zürich"
-            className="mt-4 w-full rounded-xl border border-gray-200 px-4 py-3"
-          />
+          <div className="mt-4 grid gap-4 md:grid-cols-[140px_1fr]">
+            <input
+              name="postalCode"
+              required
+              placeholder="PLZ"
+              className="rounded-xl border border-gray-200 px-4 py-3"
+              onChange={(e) => {
+                const city = swissPostalCodes[e.target.value];
+                const form = e.currentTarget.form;
+
+                if (city && form) {
+                  const regionInput = form.elements.namedItem("region") as HTMLInputElement;
+                  regionInput.value = city;
+                }
+              }}
+            />
+
+            <input
+              name="region"
+              required
+              placeholder="Region / Stadt, z.B. Zürich"
+              className="rounded-xl border border-gray-200 px-4 py-3"
+            />
+          </div>
 
           <input
             name="wantedItem"
@@ -132,28 +233,65 @@ const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
             placeholder="Kurze Beschreibung des Artikels"
             className="mt-4 w-full rounded-xl border border-gray-200 px-4 py-3"
           />
-          <input
-  type="file"
-  name="image"
-  accept="image/*"
-  className="mt-4 w-full rounded-xl border border-gray-200 bg-white px-4 py-3"
-/>
+          <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white px-6 py-10 text-center transition hover:border-[#16A34A] hover:bg-green-50">
+            <span className="text-4xl">📷</span>
+            <span className="mt-3 text-base font-semibold text-[#111827]">
+              Foto hochladen
+            </span>
+            <span className="mt-1 text-sm text-gray-500">
+              PNG, JPG oder WEBP auswählen
+            </span>
 
-<button className="mt-6 w-full rounded-full bg-[#16A34A] px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02]">
-  {loading ? "Wird gespeichert..." : "Artikel einreichen"}
-</button>
+            <input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
 
-{error && (
-  <p className="mt-4 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">
-    {error}
-  </p>
-)}
+                if (!file) {
+                  setPreview(null);
+                  setFileName("");
+                  return;
+                }
 
-{submitted && (
-  <p className="mt-4 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700">
-    Danke! Dein Artikel wurde übermittelt.
-  </p>
-)}
+                setFileName(file.name);
+                setPreview(URL.createObjectURL(file));
+              }}
+              className="hidden"
+            />
+          </label>
+          {preview && (
+            <div className="mt-5 rounded-2xl border border-gray-200 bg-white p-4">
+              <p className="mb-3 text-sm font-semibold text-gray-600">
+                Bildvorschau
+              </p>
+
+              <div className="relative h-72 overflow-hidden rounded-xl bg-gray-50">
+                <Image
+                  src={preview}
+                  alt="Vorschau"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              {fileName && (
+                <p className="mt-3 text-center text-sm text-gray-500">
+                  {fileName}
+                </p>
+              )}
+            </div>
+          )}
+
+          <button className="mt-6 w-full rounded-full bg-[#16A34A] px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-[1.02]">
+            {loading ? "Wird gespeichert..." : "Artikel einreichen"}
+          </button>
+
+          {error && (
+            <p className="mt-4 rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">
+              {error}
+            </p>
+          )}
 
           {submitted && (
             <p className="mt-4 rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700">
