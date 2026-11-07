@@ -3,9 +3,12 @@
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
+import { SWAP_STATUS, SWAP_STATUS_LABEL, type SwapRequest } from "@/lib/swapRequests";
 
 type Item = {
   id: string;
+  user_id: string | null;
+  status: string | null;
   title: string;
   category: string;
   condition: string;
@@ -27,12 +30,23 @@ export default function ItemDetailPage({
   const { id } = use(params);
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [ownRequest, setOwnRequest] = useState<SwapRequest | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState("");
 
   useEffect(() => {
     const loadItem = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+
       const { data, error } = await supabase
         .from("items")
-        .select("*")
+        .select(
+          "id, user_id, status, title, category, condition, estimated_value, currency, postal_code, region, wanted_item, description, image_url, created_at"
+        )
         .eq("id", id)
         .single();
 
@@ -40,11 +54,52 @@ export default function ItemDetailPage({
         setItem(data as Item);
       }
 
+      if (user) {
+        const { data: requests } = await supabase
+          .from("swap_requests")
+          .select("id, item_id, requester_id, owner_id, status, created_at")
+          .eq("item_id", id)
+          .eq("requester_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1);
+        setOwnRequest(((requests || []) as SwapRequest[])[0] || null);
+      }
+
       setLoading(false);
     };
 
     loadItem();
   }, [id]);
+
+  const sendRequest = async () => {
+    if (!userId) {
+      window.location.href = "/login";
+      return;
+    }
+    if (!item?.user_id) return;
+
+    setBusy(true);
+    setActionError("");
+
+    const { data, error } = await supabase
+      .from("swap_requests")
+      .insert({
+        item_id: item.id,
+        requester_id: userId,
+        owner_id: item.user_id,
+        status: SWAP_STATUS.created,
+      })
+      .select("id, item_id, requester_id, owner_id, status, created_at");
+
+    setBusy(false);
+
+    if (error || !data?.length) {
+      setActionError(error?.message || "Anfrage konnte nicht gesendet werden.");
+      return;
+    }
+
+    setOwnRequest(data[0] as SwapRequest);
+  };
 
   if (loading) {
     return (
@@ -139,9 +194,38 @@ export default function ItemDetailPage({
             </div>
           )}
 
-          <button className="mt-8 w-full rounded-full bg-[#16A34A] px-6 py-4 font-semibold text-white shadow-lg transition hover:scale-[1.02]">
-            Tauschanfrage senden
-          </button>
+          {item.user_id && userId === item.user_id ? (
+            <p className="mt-8 rounded-2xl bg-gray-50 p-4 text-center text-gray-600">
+              Das ist dein Artikel.
+            </p>
+          ) : item.status === "reserved" ? (
+            <p className="mt-8 rounded-2xl bg-gray-50 p-4 text-center text-gray-600">
+              Dieser Artikel ist reserviert.
+            </p>
+          ) : ownRequest?.status === SWAP_STATUS.created ? (
+            <a
+              href="/swap-requests"
+              className="mt-8 block w-full rounded-full bg-gray-900 px-6 py-4 text-center font-semibold text-white"
+            >
+              Anfrage gesendet · {SWAP_STATUS_LABEL[ownRequest.status]}
+            </a>
+          ) : ownRequest ? (
+            <p className="mt-8 rounded-2xl bg-gray-50 p-4 text-center text-gray-600">
+              Letzte Anfrage: {SWAP_STATUS_LABEL[ownRequest.status]}
+            </p>
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={sendRequest}
+              className="mt-8 w-full rounded-full bg-[#16A34A] px-6 py-4 font-semibold text-white shadow-lg transition hover:scale-[1.02] disabled:opacity-60"
+            >
+              {userId ? (busy ? "Wird gesendet..." : "Tauschanfrage senden") : "Zum Anfragen einloggen"}
+            </button>
+          )}
+          {actionError && (
+            <p className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">{actionError}</p>
+          )}
         </div>
       </section>
     </main>

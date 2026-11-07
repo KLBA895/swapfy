@@ -13,6 +13,23 @@ type Item = {
   image_url: string | null;
 };
 
+function ownerStoragePath(imageUrl: string, userId: string): string | null {
+  try {
+    const url = new URL(imageUrl, window.location.origin);
+    const marker = "/storage/v1/object/public/item-images/";
+    const idx = url.pathname.indexOf(marker);
+    if (idx === -1) return null;
+
+    const path = decodeURIComponent(url.pathname.slice(idx + marker.length));
+    const prefix = `items/${userId}/`;
+    if (!path.startsWith(prefix) || path.includes("..")) return null;
+
+    return path;
+  } catch {
+    return null;
+  }
+}
+
 export default function MyItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
 
@@ -29,7 +46,7 @@ export default function MyItemsPage() {
 
       const { data } = await supabase
         .from("items")
-        .select("*")
+        .select("id, title, estimated_value, currency, region, image_url")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -38,18 +55,47 @@ export default function MyItemsPage() {
 
     loadItems();
   }, []);
-  const deleteItem = async (id: string) => {
+  const deleteItem = async (id: string, imageUrl: string | null) => {
     const ok = confirm("Artikel wirklich löschen?");
 
     if (!ok) return;
 
-    const { error } = await supabase
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
+    const storagePath = imageUrl ? ownerStoragePath(imageUrl, user.id) : null;
+
+    if (storagePath) {
+      const { error: storageError } = await supabase.storage
+        .from("item-images")
+        .remove([storagePath]);
+
+      if (storageError) {
+        alert(`Bild konnte nicht gelöscht werden: ${storageError.message}`);
+        return;
+      }
+    }
+
+    const { data, error } = await supabase
       .from("items")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select("id");
 
     if (error) {
       alert(error.message);
+      return;
+    }
+
+    if (!data?.length) {
+      alert("Keine Berechtigung oder Artikel nicht gefunden.");
       return;
     }
 
@@ -97,7 +143,7 @@ export default function MyItemsPage() {
               </a>
 
               <button
-                onClick={() => deleteItem(item.id)}
+                onClick={() => deleteItem(item.id, item.image_url)}
                 className="flex-1 rounded-full bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
               >
                 🗑 Löschen

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 type Item = {
   id: string;
+  user_id: string | null;
   title: string;
   estimated_value: string;
   currency: string | null;
@@ -26,10 +27,22 @@ export default function EditItemPage({
 
   useEffect(() => {
     const loadItem = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        window.location.href = "/login";
+        return;
+      }
+
       const { data, error } = await supabase
         .from("items")
-        .select("*")
+        .select(
+          "id, user_id, title, estimated_value, currency, region, wanted_item, description"
+        )
         .eq("id", id)
+        .eq("user_id", user.id)
         .single();
 
       if (error) setError(error.message);
@@ -46,9 +59,18 @@ export default function EditItemPage({
     setSaved(false);
     setError("");
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("items")
       .update({
         title: formData.get("title") as string,
@@ -58,10 +80,17 @@ export default function EditItemPage({
         wanted_item: formData.get("wantedItem") as string,
         description: formData.get("description") as string,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .select("id");
 
     if (error) {
       setError(error.message);
+      return;
+    }
+
+    if (!data?.length) {
+      setError("Keine Berechtigung oder Artikel nicht gefunden.");
       return;
     }
 

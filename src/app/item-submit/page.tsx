@@ -1,15 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { listingDraftStubEnabled } from "@/lib/listingDraft";
 
 export default function ItemSubmitPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState("");
+  const [ready, setReady] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
+  const [description, setDescription] = useState("");
+  const [draftText, setDraftText] = useState("");
+  const [draftBusy, setDraftBusy] = useState(false);
+  const [draftError, setDraftError] = useState("");
+  const draftEnabled = listingDraftStubEnabled();
   const swissPostalCodes: Record<string, string> = {
     "8001": "Zürich",
     "8953": "Dietikon",
@@ -24,6 +34,25 @@ export default function ItemSubmitPage() {
     "1003": "Lausanne",
   };
 
+  useEffect(() => {
+    const requireUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        window.location.href = "/login";
+        return;
+      }
+
+      setProfileName(String(user.user_metadata?.name || ""));
+      setProfileEmail(String(user.email || ""));
+      setReady(true);
+    };
+
+    requireUser();
+  }, []);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -35,13 +64,19 @@ export default function ItemSubmitPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      setLoading(false);
+      window.location.href = "/login";
+      return;
+    }
+
     const imageFile = formData.get("image") as File;
     let imageUrl = "";
 
     if (imageFile && imageFile.size > 0) {
       const fileExt = imageFile.name.split(".").pop();
       const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `items/${fileName}`;
+      const filePath = `items/${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("item-images")
@@ -61,9 +96,7 @@ export default function ItemSubmitPage() {
     }
 
     const { error } = await supabase.from("items").insert({
-      user_id: user?.id,
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
+      user_id: user.id,
       title: formData.get("itemTitle") as string,
       category: formData.get("category") as string,
       condition: formData.get("condition") as string,
@@ -88,7 +121,55 @@ export default function ItemSubmitPage() {
     form.reset();
     setPreview(null);
     setFileName("");
+    setDescription("");
+    setDraftText("");
   };
+
+  const requestDraft = async () => {
+    const form = formRef.current;
+    if (!form) return;
+    setDraftBusy(true);
+    setDraftError("");
+    const data = new FormData(form);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      setDraftBusy(false);
+      window.location.href = "/login";
+      return;
+    }
+
+    const response = await fetch("/api/listing-draft", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        title: data.get("itemTitle"),
+        category: data.get("category"),
+        condition: data.get("condition"),
+        wantedItem: data.get("wantedItem"),
+        notes: data.get("description"),
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    setDraftBusy(false);
+    if (!response.ok) {
+      setDraftError(payload.error || "Vorschlag nicht verfügbar.");
+      return;
+    }
+    setDraftText(String(payload.description || ""));
+  };
+
+  if (!ready) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        Lade Benutzer...
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-white text-[#111827]">
@@ -131,12 +212,26 @@ export default function ItemSubmitPage() {
         </p>
 
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="mt-10 rounded-3xl border border-gray-100 bg-gray-50 p-6 shadow-sm"
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <input name="name" required placeholder="Name" className="rounded-xl border border-gray-200 px-4 py-3" />
-            <input name="email" required type="email" placeholder="E-Mail" className="rounded-xl border border-gray-200 px-4 py-3" />
+            <input
+              name="name"
+              value={profileName}
+              readOnly
+              placeholder="Name"
+              className="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-gray-600"
+            />
+            <input
+              name="email"
+              value={profileEmail}
+              readOnly
+              type="email"
+              placeholder="E-Mail"
+              className="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-gray-600"
+            />
             <input name="itemTitle" required placeholder="Artikelname, z.B. Apple Watch" className="rounded-xl border border-gray-200 px-4 py-3" />
             <div className="flex overflow-hidden rounded-xl border border-gray-200 bg-white">
               <input
@@ -230,9 +325,48 @@ export default function ItemSubmitPage() {
           <textarea
             name="description"
             rows={5}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
             placeholder="Kurze Beschreibung des Artikels"
             className="mt-4 w-full rounded-xl border border-gray-200 px-4 py-3"
           />
+          {draftEnabled && (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={requestDraft}
+                disabled={draftBusy}
+                className="rounded-full border px-4 py-2 text-sm font-semibold disabled:opacity-60"
+              >
+                {draftBusy ? "Vorschlag wird erstellt..." : "Textvorschlag"}
+              </button>
+              <p className="mt-2 text-xs text-gray-500">
+                Lokaler Entwurf, keine externe KI. Wert, Zustand und Veröffentlichung bleiben bei dir.
+              </p>
+              {draftError && <p className="mt-2 text-sm text-red-700">{draftError}</p>}
+              {draftText && (
+                <div className="mt-3 rounded-2xl border border-gray-200 bg-white p-4">
+                  <p className="text-sm font-semibold">Vorschau — noch nicht gespeichert</p>
+                  <textarea
+                    rows={4}
+                    value={draftText}
+                    onChange={(event) => setDraftText(event.target.value)}
+                    className="mt-2 w-full rounded-xl border px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    className="mt-3 rounded-full bg-[#16A34A] px-4 py-2 text-sm font-semibold text-white"
+                    onClick={() => {
+                      setDescription(draftText);
+                      setDraftText("");
+                    }}
+                  >
+                    Diesen Text übernehmen
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white px-6 py-10 text-center transition hover:border-[#16A34A] hover:bg-green-50">
             <span className="text-4xl">📷</span>
             <span className="mt-3 text-base font-semibold text-[#111827]">
